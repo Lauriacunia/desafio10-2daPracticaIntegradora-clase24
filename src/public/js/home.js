@@ -1,22 +1,27 @@
-const createCart = () => {
-  console.log("🛒 Creando tu carrito...");
-  if (!localStorage.getItem("funcionEjecutadaSoloUnaVez")) {
-    fetch("/carts", {
-      method: "POST",
+const getCurrentUser = () => {
+  // console.log("Get current user...");
+  fetch("/auth/current", {
+    method: "GET",
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      const user = data;
+      console.log("user", user);
+      if (user) {
+        localStorage.setItem("email", JSON.stringify(user.email));
+        localStorage.setItem(
+          "fullname",
+          JSON.stringify(user.first_name + " " + user.last_name)
+        );
+        if (user.cart) {
+          localStorage.setItem("cartId", JSON.stringify(user.cart));
+        }
+      }
     })
-      .then((res) => res.json())
-      .then((data) => {
-        let myCart = data.payload;
-        localStorage.setItem("myCart", JSON.stringify(myCart));
-        localStorage.setItem("myCartId", JSON.stringify(myCart._id));
-        localStorage.setItem("funcionEjecutadaSoloUnaVez", true);
-      })
-      .catch((err) => console.log(err));
-  }
+    .catch((err) => console.log(err));
 };
 
 const getAllProducts = (limit, page, sort, query) => {
-  const myCartId = JSON.parse(localStorage.getItem("myCartId"));
   let urlBase = `/products`;
   if (limit) {
     urlBase += `?limit=${limit}`;
@@ -30,7 +35,7 @@ const getAllProducts = (limit, page, sort, query) => {
   if (query) {
     urlBase += `&query[title]=${query}`;
   }
-  console.log("urlBase", urlBase);
+  //console.log("urlBase", urlBase);
   fetch(`${urlBase}`)
     .then((res) => res.json())
     .then((data) => {
@@ -112,9 +117,9 @@ function renderPagination(payload) {
 }
 
 const addToCart = (id) => {
-  const myCartId = JSON.parse(localStorage.getItem("myCartId"));
-  console.log(`Agregando producto id=${id} al carrito id=${myCartId}`);
-  fetch(`/carts/${myCartId}/products/${id}`, {
+  const cartId = JSON.parse(localStorage.getItem("cartId"));
+  console.log(`Agregando producto id=${id} al carrito id=${cartId}`);
+  fetch(`/carts/${cartId}/products/${id}`, {
     method: "PUT",
   })
     .then((res) => res.json())
@@ -138,8 +143,8 @@ const deleteProduct = (id) => {
 };
 
 const goToCart = () => {
-  const myCartId = JSON.parse(localStorage.getItem("myCartId"));
-  window.location.href = "/carts/" + myCartId;
+  const cartId = JSON.parse(localStorage.getItem("cartId"));
+  window.location.href = "/carts/" + cartId;
 };
 const goToLogin = () => {
   window.location.href = "/auth/login";
@@ -152,7 +157,7 @@ const goToLogout = () => {
 };
 
 const init = () => {
-  createCart();
+  getCurrentUser();
   getAllProducts(5, 1, null, null);
 };
 init();

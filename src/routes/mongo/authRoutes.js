@@ -32,6 +32,11 @@ router.post(
   })
 );
 
+// obtener el usuario autenticado actualmente
+router.get("/current", (req, res) => {
+  res.json(req.user);
+});
+
 router.get("/logout", (req, res) => {
   // req.session.destroy(() => {
   //   res.render("login");
