@@ -38,9 +38,6 @@ router.get("/current", (req, res) => {
 });
 
 router.get("/logout", (req, res) => {
-  // req.session.destroy(() => {
-  //   res.render("login");
-  // });
   // Hace logout y elimina la sesión del usuario autenticado
   console.log("req.logout", req.logout);
   req.logout(function (err) {
